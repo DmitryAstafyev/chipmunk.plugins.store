@@ -3,5 +3,26 @@
         "name": "chipmunk.serialport.plugin",
         "repo": "https://github.com/DmitryAstafyev/chipmunk.serialport.plugin.git",
         "version": "1.0.0"
+    },
+    {
+        "name": "chipmunk.sh.plugin",
+        "repo": "https://github.com/DmitryAstafyev/chipmunk.sh.plugin.git",
+        "version": "1.0.0"
+    },
+    {
+        "name": "chipmunk.xterminal.plugin",
+        "repo": "https://github.com/DmitryAstafyev/chipmunk.xterminal.plugin.git",
+        "version": "1.0.0"
+    },
+    {
+        "name": "chipmunk.asciicolors.plugin",
+        "repo": "https://github.com/DmitryAstafyev/chipmunk.asciicolors.plugin.git",
+        "version": "1.0.0"
+    },
+    {
+        "name": "chipmunk.dltdetails.plugin",
+        "repo": "https://github.com/DmitryAstafyev/chipmunk.dltdetails.plugin.git",
+        "version": "1.0.0"
     }
+
 ]

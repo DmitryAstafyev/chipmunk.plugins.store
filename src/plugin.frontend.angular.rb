@@ -1,10 +1,5 @@
 require 'json'
 
-PLUGIN_FRONTEND_ANGULAR_PACKAGE = "ng-package.json"
-PLUGIN_FRONTEND_ANGULAR_BASE_REPO = "https://github.com/DmitryAstafyev/chipmunk.frontend.angular.git"
-PLUGIN_FRONTEND_ANGULAR_BASE_NAME = "chipmunk.frontend.angular"
-TMP_FOLDER = "./tmp"
-
 class PluginFrontendAngular
 
     def initialize(path, versions, package_json)

@@ -1,10 +1,12 @@
 require './src/register'
 require './src/plugin'
 require './src/versions'
+require './src/tools'
 
 PLUGINS_DEST_FOLDER = "./plugins";
 
-task :clone do 
+task :build do
+    success = true
     register = Register.new()
     versions = Versions.new()
     loop do
@@ -12,21 +14,16 @@ task :clone do
         if plugin_info == nil
             break
         end
-        plugin = Plugin.new(plugin_info['name'], plugin_info['repo'], PLUGINS_DEST_FOLDER, versions.get())
-        plugin.build()
-        puts plugin
-    end
-
-end
-
-task :list do
-    folders = Dir.entries(PLUGINS_DEST_FOLDER).select {|f| !File.directory? f}
-    folders.each do |plugin_folder|
-        puts "Checking: #{plugin_folder}"
-        cd "#{PLUGINS_DEST_FOLDER}/#{plugin_folder}" do
-            if !File.directory?(PLUGIN_FRONTEND_FOLDER) && !File.directory?(PLUGIN_BACKEND_FOLDER) 
-                puts "Plugin \"#{plugin_folder}\" doesn't have not front-end, not back-end. Will be skipped"
-            end
+        plugin = Plugin.new(plugin_info['name'], plugin_info['repo'], PLUGINS_DEST_FOLDER, plugin_info['version'], versions.get())
+        if plugin.build()
+            plugin.cleanup()
+            puts "Plugin #{plugin_info['name']} is built SUCCESSFULLY"
+        else
+            success = false
+            puts "Fail to build plugin #{plugin_info['name']}"
         end
+    end
+    if success
+        cleanup()
     end
 end

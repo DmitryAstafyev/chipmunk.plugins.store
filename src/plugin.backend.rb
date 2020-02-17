@@ -7,6 +7,7 @@ class PluginBackend
     def initialize(path, versions)  
         @path = "#{path}/#{PLUGIN_BACKEND_FOLDER}"
         @versions = versions
+        @state = false
     end  
       
     def exist
@@ -53,13 +54,22 @@ class PluginBackend
                 #sign_plugin_binary("#{PLUGINS_SANDBOX}/#{plugin}/process")
                 puts "Uninstall electron and electron-rebuild"
                 Rake.sh "npm uninstall electron electron-rebuild"
+                @state = true
                 return true
             rescue StandardError => e  
-                puts e.message  
+                puts e.message
+                @state = nil
                 return false
             end
         end
+    end
 
+    def get_path
+        return @path
+    end
+
+    def get_state
+        return @state
     end
 
 end
