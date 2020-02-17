@@ -1,0 +1,7 @@
+[
+    {
+        "name": "chipmunk.serialport.plugin",
+        "repo": "https://github.com/DmitryAstafyev/chipmunk.serialport.plugin.git",
+        "version": "1.0.0"
+    }
+]
