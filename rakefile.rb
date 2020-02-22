@@ -14,7 +14,7 @@ task :build do
         if plugin_info == nil
             break
         end
-        plugin = Plugin.new(plugin_info['name'], plugin_info['repo'], PLUGINS_DEST_FOLDER, plugin_info['version'], versions.get())
+        plugin = Plugin.new(plugin_info['name'], plugin_info['repo'], PLUGINS_DEST_FOLDER, plugin_info['version'], versions.get(), versions.get_hash())
         if plugin.build()
             plugin.cleanup()
             puts "Plugin #{plugin_info['name']} is built SUCCESSFULLY"

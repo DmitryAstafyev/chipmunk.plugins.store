@@ -8,12 +8,13 @@ PLUGIN_RELEASE_FOLDER = "./releases"
 
 class Plugin
 
-    def initialize(name, repo, path, version, versions)  
+    def initialize(name, repo, path, version, versions, hash)  
         @name = name
         @repo = repo
         @path = path
         @version = version
         @versions = versions
+        @hash = hash
         @root = "#{@path}/#{@name}"
     end
 
@@ -70,7 +71,7 @@ class Plugin
         if frontend.get_state()
             copy_dist(frontend.get_path(), "#{dest}/render")
         end
-        compress("#{PLUGIN_RELEASE_FOLDER}/#{@name}@#{@versions.get_hash()}-#{@version}-#{get_nodejs_platform()}.tgz", @path, @name)
+        compress("#{PLUGIN_RELEASE_FOLDER}/#{@name}@#{@hash}-#{@version}-#{get_nodejs_platform()}.tgz", @path, @name)
         return true
     end
 
