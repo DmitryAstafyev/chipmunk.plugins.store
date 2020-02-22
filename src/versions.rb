@@ -21,4 +21,12 @@ class Versions
         return @versions
     end
 
+    def get_hash
+        electron = @versions['electron'].split(".")
+        rebuild = @versions['electron-rebuild'].split(".")
+        toolkit = @versions['chipmunk.client.toolkit'].split(".")
+        ipc = @versions['chipmunk.plugin.ipc'].split(".")
+        return "#{electron[0]}#{rebuild[0]}#{toolkit[0]}#{ipc[0]}.#{electron[1]}#{rebuild[1]}#{toolkit[1]}#{ipc[1]}.#{electron[2]}#{rebuild[2]}#{toolkit[2]}#{ipc[2]}"
+    end
+
 end
