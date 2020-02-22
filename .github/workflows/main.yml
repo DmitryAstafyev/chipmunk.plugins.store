@@ -1,17 +1,41 @@
-name: CI
+name: Building
 
-on: [push]
+on:
+  push:
+    branches:
+      - master         # Push events on master branch
+    tags:
+      - '*'
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-2016, macOS-latest]
+        rust: [stable]
     steps:
-    - uses: actions/checkout@v2
-    - name: Run a one-line script
-      run: echo Hello, world!
-    - name: Run a multi-line script
-      run: |
-        echo Add other actions to build,
-        echo test, and deploy your project.
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Install windows python
+        uses: actions/setup-python@v1
+        if: startsWith(matrix.os, 'windows')
+        with:
+          python-version: '2.7'
+          architecture: 'x64' # (x64 or x86)
+      - name: install ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: '2.x'
+      - name: install dotenv
+        run: gem install dotenv
+      - name: install node
+        uses: actions/setup-node@master
+        with:
+          node-version: '10.16.3'
+      - name: install typescript
+        if: "!startsWith(matrix.os, 'windows')"
+        run: npm install --global typescript@3.5.1
+      - name: build plugins
+        run: rake build --trace
+      - run: ls
