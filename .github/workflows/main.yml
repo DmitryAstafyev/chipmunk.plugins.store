@@ -11,6 +11,7 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      max-parallel: 1
       matrix:
         os: [ubuntu-latest, windows-2016, macOS-latest]
         rust: [stable]
@@ -47,9 +48,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          draft: true
           files: |
-          "./releases/*.tgz"
-          "./releases/*.json"
+            ./releases/*.tgz
+            ./releases/*.json
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.CHIPMUNK_PLUGINS_STORE_GITHUB_TOKEN }}
