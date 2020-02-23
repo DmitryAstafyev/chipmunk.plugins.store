@@ -21,7 +21,7 @@ class Plugin
 
     def build
         target_file_name = self.class.get_name(@name, @hash, @version)
-        if @assets.index(target_file_name) == nil
+        if @assets.index(target_file_name) != nil
             puts "No need to build plugin #{@name} because it's already exist"
             return true
         end
