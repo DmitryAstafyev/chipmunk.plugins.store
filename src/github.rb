@@ -1,6 +1,6 @@
 require 'octokit'
 
-REPO = "DmitryAstafyev/logviewer"
+REPO = "DmitryAstafyev/chipmunk.plugins.store"
 
 class Github
       
