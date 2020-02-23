@@ -4,11 +4,9 @@ require './src/plugin.backend'
 require './src/plugin.frontend'
 require './src/tools'
 
-PLUGIN_RELEASE_FOLDER = "./releases"
-
 class Plugin
 
-    def initialize(name, repo, path, version, versions, hash, assets)  
+    def initialize(name, repo, path, version, versions, hash, releases)  
         @name = name
         @repo = repo
         @path = path
@@ -16,13 +14,14 @@ class Plugin
         @versions = versions
         @hash = hash
         @root = "#{@path}/#{@name}"
-        @assets = assets
+        @releases = releases
     end
 
     def build
         target_file_name = self.class.get_name(@name, @hash, @version)
-        if @assets.index(target_file_name) != nil
+        if @releases.exist(target_file_name)
             puts "No need to build plugin #{@name} because it's already exist"
+            @releases.write()
             return true
         end
         self.class.clone(@name, @repo, @path)
@@ -78,6 +77,8 @@ class Plugin
             copy_dist(frontend.get_path(), "#{dest}/render")
         end
         compress("#{PLUGIN_RELEASE_FOLDER}/#{self.class.get_name(@name, @hash, @version)}", @path, @name)
+        @releases.add(@name, self.class.get_name(@name, @hash, @version), @version)
+        @releases.write()
         return true
     end
 

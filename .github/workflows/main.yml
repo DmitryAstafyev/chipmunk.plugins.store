@@ -47,7 +47,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: "./releases/*.tgz"
           draft: true
+          files: |
+          "./releases/*.tgz"
+          "./releases/*.json"
         env:
           GITHUB_TOKEN: ${{ secrets.CHIPMUNK_PLUGINS_STORE_GITHUB_TOKEN }}
