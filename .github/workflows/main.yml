@@ -29,6 +29,8 @@ jobs:
           ruby-version: '2.x'
       - name: install dotenv
         run: gem install dotenv
+      - name: install octokit
+        run: gem install octokit
       - name: install node
         uses: actions/setup-node@master
         with:
@@ -38,4 +40,13 @@ jobs:
         run: npm install --global typescript@3.5.1
       - name: build plugins
         run: rake build --trace
+        env:
+          CHIPMUNK_PLUGINS_STORE_GITHUB_KEY: ${{ secrets.CHIPMUNK_PLUGINS_STORE_GITHUB_TOKEN }}
       - run: ls
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "./releases/*.tgz"
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.CHIPMUNK_PLUGINS_STORE_GITHUB_TOKEN }}

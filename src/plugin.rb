@@ -8,7 +8,7 @@ PLUGIN_RELEASE_FOLDER = "./releases"
 
 class Plugin
 
-    def initialize(name, repo, path, version, versions, hash)  
+    def initialize(name, repo, path, version, versions, hash, assets)  
         @name = name
         @repo = repo
         @path = path
@@ -16,9 +16,15 @@ class Plugin
         @versions = versions
         @hash = hash
         @root = "#{@path}/#{@name}"
+        @assets = assets
     end
 
     def build
+        target_file_name = self.class.get_name(@name, @hash, @version)
+        if @assets.index(target_file_name) == nil
+            puts "No need to build plugin #{@name} because it's already exist"
+            return true
+        end
         self.class.clone(@name, @repo, @path)
         backend = PluginBackend.new(@root, @versions)
         if !backend.exist() 
@@ -71,7 +77,7 @@ class Plugin
         if frontend.get_state()
             copy_dist(frontend.get_path(), "#{dest}/render")
         end
-        compress("#{PLUGIN_RELEASE_FOLDER}/#{@name}@#{@hash}-#{@version}-#{get_nodejs_platform()}.tgz", @path, @name)
+        compress("#{PLUGIN_RELEASE_FOLDER}/#{self.class.get_name(@name, @hash, @version)}", @path, @name)
         return true
     end
 
@@ -92,6 +98,10 @@ class Plugin
                 Rake.sh "git clone #{repo}"
             end
         end
+    end
+
+    def self.get_name(name, hash, version)
+        return "#{name}@#{hash}-#{version}-#{get_nodejs_platform()}.tgz"
     end
 
 end
