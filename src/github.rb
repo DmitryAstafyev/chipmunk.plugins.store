@@ -5,8 +5,16 @@ REPO = "DmitryAstafyev/chipmunk.plugins.store"
 
 class Github
     
-    def initialize() 
-        @client = Octokit::Client.new(:access_token => ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_TOKEN'])
+    def initialize()
+        if ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_LOGIN'] == nil && ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_PASW'] == nil
+            puts "Login to Github using token"
+            @client = Octokit::Client.new(:access_token => ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_TOKEN'])
+        else
+            puts "Login to Github using login/password"
+            @client = Octokit::Client.new(:login => ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_LOGIN'], :password => ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_PASW'])
+        end
+        user = @client.user
+        puts "Github login: #{user.login}"
     end
 
     def get_releases_list(target)
