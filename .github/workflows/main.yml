@@ -13,7 +13,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        os: [ubuntu-latest, windows-2016, macOS-latest]
+        os: [macOS-latest, ubuntu-latest, windows-2016]
         rust: [stable]
     steps:
       - name: Checkout
