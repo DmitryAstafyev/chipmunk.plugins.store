@@ -2,7 +2,7 @@
     {
         "name": "chipmunk.serialport.plugin",
         "repo": "https://github.com/DmitryAstafyev/chipmunk.serialport.plugin.git",
-        "version": "1.0.0"
+        "version": "1.0.1"
     },
     {
         "name": "chipmunk.sh.plugin",
