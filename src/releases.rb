@@ -26,7 +26,7 @@ class Releases
 
     def add(name, file_name, version)
         @releases = @releases.select do |release|
-            release.name != name
+            release['name'] != name
         end
         @releases.push({
             "name" => name,
