@@ -6,12 +6,13 @@ REPO = "DmitryAstafyev/chipmunk.plugins.store"
 class Github
     
     def initialize()
-        if ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_LOGIN'] == nil && ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_PASW'] == nil
-            puts "Login to Github using token"
-            @client = Octokit::Client.new(:access_token => ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_TOKEN'])
-        else
+        if ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_LOGIN'] != nil && ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_PASW'] != nil &&
+           ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_LOGIN'] != '' && ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_PASW'] != ''
             puts "Login to Github using login/password"
             @client = Octokit::Client.new(:login => ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_LOGIN'], :password => ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_PASW'])
+        else
+            puts "Login to Github using token"
+            @client = Octokit::Client.new(:access_token => ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_TOKEN'])
         end
         user = @client.user
         puts "Github login: #{user.login}"
