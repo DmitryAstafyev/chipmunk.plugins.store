@@ -42,7 +42,9 @@ jobs:
       - name: build plugins
         run: rake build --trace
         env:
-          CHIPMUNK_PLUGINS_STORE_GITHUB_KEY: ${{ secrets.CHIPMUNK_PLUGINS_STORE_GITHUB_TOKEN }}
+          CHIPMUNK_PLUGINS_STORE_GITHUB_TOKEN: ${{ secrets.CHIPMUNK_PLUGINS_STORE_GITHUB_TOKEN }}
+          CHIPMUNK_PLUGINS_STORE_GITHUB_LOGIN: ${{ secrets.CHIPMUNK_PLUGINS_STORE_GITHUB_LOGIN }}
+          CHIPMUNK_PLUGINS_STORE_GITHUB_PASW: ${{ secrets.CHIPMUNK_PLUGINS_STORE_GITHUB_PASW }}
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
