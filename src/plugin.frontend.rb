@@ -37,6 +37,7 @@ class PluginFrontend
         if angular.is()
             if angular.install()
                 @state = true
+                @path = angular.get_dist_path()
             else
                 @state = nil
             end
@@ -46,6 +47,7 @@ class PluginFrontend
         if frontend.is()
             if frontend.install()
                 @state = true
+                @path = frontend.get_dist_path()
             else
                 @state = nil
             end

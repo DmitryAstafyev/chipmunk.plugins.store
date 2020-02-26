@@ -71,4 +71,8 @@ class PluginFrontendAngular
         end
     end
 
+    def get_dist_path
+        return "#{TMP_FOLDER}/#{PLUGIN_FRONTEND_ANGULAR_BASE_NAME}/dist/#{@package_json['name']}"
+    end
+    
 end

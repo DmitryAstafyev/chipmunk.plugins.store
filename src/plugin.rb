@@ -76,7 +76,7 @@ class Plugin
         if frontend.get_state()
             copy_dist(frontend.get_path(), "#{dest}/render")
         end
-        compress("#{PLUGIN_RELEASE_FOLDER}/#{self.class.get_name(@name, @hash, @version)}", @path, @name)
+        compress("#{PLUGIN_RELEASE_FOLDER}/#{self.class.get_name(@name, @hash, @version)}", PLUGIN_RELEASE_FOLDER, @name)
         @releases.add(@name, self.class.get_name(@name, @hash, @version), @version)
         @releases.write()
         return true

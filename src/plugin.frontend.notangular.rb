@@ -42,4 +42,8 @@ class PluginFrontendNotAngular
         end
     end
 
+    def get_dist_path
+        return @path
+    end
+
 end
