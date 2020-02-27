@@ -3,6 +3,8 @@ require './src/plugin'
 require './src/versions'
 require './src/tools'
 require './src/releases'
+require "zlib"
+require 'base64'
 
 PLUGINS_DEST_FOLDER = "./plugins";
 PLUGIN_RELEASE_FOLDER = "./releases"
@@ -12,12 +14,13 @@ task :build do
     register = Register.new()
     versions = Versions.new()
     releases = Releases.new()
+    puts "Current versions hash:\n\t#{versions.get_hash()}\n"
     loop do
         plugin_info = register.next()
         if plugin_info == nil
             break
         end
-        plugin = Plugin.new(plugin_info['name'], plugin_info['repo'], PLUGINS_DEST_FOLDER, plugin_info['version'], versions.get(), versions.get_hash(), releases)
+        plugin = Plugin.new(plugin_info, PLUGINS_DEST_FOLDER, versions.get(), versions.get_hash(), releases)
         if plugin.build()
             plugin.cleanup()
             puts "Plugin #{plugin_info['name']} is built SUCCESSFULLY"
@@ -30,3 +33,4 @@ task :build do
         cleanup()
     end
 end
+

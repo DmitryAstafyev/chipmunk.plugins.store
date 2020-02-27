@@ -15,6 +15,9 @@ class Versions
         puts "\telectron-rebuild: #{@versions['electron-rebuild']}\n"
         puts "\tchipmunk.client.toolkit: #{@versions['chipmunk.client.toolkit']}\n"
         puts "\tchipmunk.plugin.ipc: #{@versions['chipmunk.plugin.ipc']}\n"
+        puts "\tchipmunk-client-material: #{@versions['chipmunk-client-material']}\n"
+        puts "\tangular-core: #{@versions['angular-core']}\n"
+        puts "\tangular-material: #{@versions['angular-material']}\n"
     end
 
     def get
@@ -26,7 +29,10 @@ class Versions
         rebuild = @versions['electron-rebuild'].split(".")
         toolkit = @versions['chipmunk.client.toolkit'].split(".")
         ipc = @versions['chipmunk.plugin.ipc'].split(".")
-        return "#{electron[0]}#{rebuild[0]}#{toolkit[0]}#{ipc[0]}.#{electron[1]}#{rebuild[1]}#{toolkit[1]}#{ipc[1]}.#{electron[2]}#{rebuild[2]}#{toolkit[2]}#{ipc[2]}"
+        material = @versions['chipmunk-client-material'].split(".")
+        angular = @versions['angular-core'].split(".")
+        angular_material = @versions['angular-material'].split(".")
+        return "#{electron[0]}#{rebuild[0]}#{toolkit[0]}#{ipc[0]}#{material[0]}#{angular[0]}#{angular_material[0]}.#{electron[1]}#{rebuild[1]}#{toolkit[1]}#{ipc[1]}#{material[1]}#{angular[1]}#{angular_material[1]}.#{electron[2]}#{rebuild[2]}#{toolkit[2]}#{ipc[2]}#{material[2]}#{angular[2]}#{angular_material[1]}"
     end
 
 end

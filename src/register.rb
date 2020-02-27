@@ -30,6 +30,16 @@ class Register
         true
     end
 
+    def self.normalize(entry)
+        if !entry.has_key?('default')
+            entry['default'] = false
+        end
+        if !entry.has_key?('has_to_be_signed')
+            entry['has_to_be_signed'] = false
+        end
+        return entry
+    end
+
     def next
         if (@cursor >= @plugins.length)
             return nil
@@ -40,7 +50,7 @@ class Register
             end
             @cursor = @cursor + 1
             if self.class.validate(@plugins[@cursor - 1]) 
-               return @plugins[@cursor - 1]
+               return self.class.normalize(@plugins[@cursor - 1])
             end
         end
     end
