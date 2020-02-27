@@ -55,4 +55,14 @@ class Register
         end
     end
 
+    def get_by_name(name)
+        result = nil
+        @plugins.each { |plugin|
+            if plugin['name'] == name
+                result = self.class.normalize(plugin)
+            end
+        }
+        return result
+    end
+
 end

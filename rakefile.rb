@@ -30,7 +30,8 @@ task :build do
         end
     end
     if success
+        releases.normalize(register)
+        releases.write()
         cleanup()
     end
 end
-

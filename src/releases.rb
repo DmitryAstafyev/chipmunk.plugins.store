@@ -46,7 +46,26 @@ class Releases
         end
     end
 
+    def normalize(register)
+        result = []
+        @releases.each { |release|
+            plugin = register.get_by_name(release['name'])
+            if plugin != nil
+                result.push({
+                    "name" => release['name'],
+                    "file" => release['file'],
+                    "version" => release['version'],
+                    "url" => release['url'],
+                    "default" => plugin['default'],
+                    "signed" => plugin['has_to_be_signed'],
+                })
+            end
+        }
+        @releases = result
+    end
+
     def self.get_name()
         return "#{RELEASES_FILE_NAME}-#{get_nodejs_platform()}.json"
     end
+    
 end
