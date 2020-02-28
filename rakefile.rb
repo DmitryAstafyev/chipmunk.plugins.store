@@ -13,7 +13,7 @@ task :build do
     success = true
     register = Register.new()
     versions = Versions.new()
-    releases = Releases.new()
+    releases = Releases.new(versions)
     puts "Current versions hash:\n\t#{versions.get_hash()}\n"
     loop do
         plugin_info = register.next()

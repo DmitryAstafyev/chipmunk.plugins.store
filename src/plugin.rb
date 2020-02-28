@@ -74,8 +74,10 @@ class Plugin
         if frontend.get_state()
             copy_dist(frontend.get_path(), "#{dest}/render")
         end
-        compress("#{PLUGIN_RELEASE_FOLDER}/#{self.class.get_name(@info['name'], @hash, @info['version'])}", PLUGIN_RELEASE_FOLDER, @info['name'])
-        @releases.add(@info['name'], self.class.get_name(@info['name'], @hash, @info['version']), @info['version'])
+        file_name = self.class.get_name(@info['name'], @hash, @info['version'])
+        self.class.add_info(dest, @info['name'], @releases.get_url(file_name), file_name, @info['version'], @hash)
+        compress("#{PLUGIN_RELEASE_FOLDER}/#{file_name}", PLUGIN_RELEASE_FOLDER, @info['name'])
+        @releases.add(@info['name'], file_name, @info['version'])
         @releases.write()
         return true
     end
@@ -101,6 +103,19 @@ class Plugin
 
     def self.get_name(name, hash, version)
         return "#{name}@#{hash}-#{version}-#{get_nodejs_platform()}.tgz"
+    end
+
+    def self.add_info(dest, name, url, file_name, version, hash)
+        info = {
+            "name" => name,
+            "file" => file_name,
+            "version" => version,
+            "hash" => hash,
+            "url" => url
+        }
+        File.open("./#{dest}/info.json","w") do |f|
+            f.write(info.to_json)
+        end
     end
 
 end

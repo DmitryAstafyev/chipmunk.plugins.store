@@ -7,7 +7,8 @@ RELEASE_URL_PATTERN = "https://github.com/DmitryAstafyev/chipmunk.plugins.store/
 
 class Releases
 
-    def initialize()
+    def initialize(versions)
+        @versions = versions
         @git = Github.new()
         @releases = @git.get_releases_list(self.class.get_name())
         @tag = @git.get_last_tag()
@@ -56,12 +57,17 @@ class Releases
                     "file" => release['file'],
                     "version" => release['version'],
                     "url" => release['url'],
+                    "hash" => @versions.get_hash(),
                     "default" => plugin['default'],
                     "signed" => plugin['has_to_be_signed'],
                 })
             end
         }
         @releases = result
+    end
+
+    def get_url(file_name)
+        return RELEASE_URL_PATTERN.sub("${tag}", @tag.name).sub("${file_name}", file_name)
     end
 
     def self.get_name()
