@@ -3,8 +3,6 @@ require './src/plugin'
 require './src/versions'
 require './src/tools'
 require './src/releases'
-require "zlib"
-require 'base64'
 
 PLUGINS_DEST_FOLDER = "./plugins";
 PLUGIN_RELEASE_FOLDER = "./releases"
