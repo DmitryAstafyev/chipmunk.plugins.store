@@ -25,14 +25,25 @@ class Versions
     end
 
     def get_hash
-        electron = @versions['electron'].split(".")
-        rebuild = @versions['electron-rebuild'].split(".")
-        toolkit = @versions['chipmunk.client.toolkit'].split(".")
-        ipc = @versions['chipmunk.plugin.ipc'].split(".")
-        material = @versions['chipmunk-client-material'].split(".")
-        angular = @versions['angular-core'].split(".")
-        angular_material = @versions['angular-material'].split(".")
-        return "#{electron[0]}#{rebuild[0]}#{toolkit[0]}#{ipc[0]}#{material[0]}#{angular[0]}#{angular_material[0]}.#{electron[1]}#{rebuild[1]}#{toolkit[1]}#{ipc[1]}#{material[1]}#{angular[1]}#{angular_material[1]}.#{electron[2]}#{rebuild[2]}#{toolkit[2]}#{ipc[2]}#{material[2]}#{angular[2]}#{angular_material[1]}"
+        p = [
+            @versions['electron'].split("."),
+            @versions['electron-rebuild'].split("."),
+            @versions['chipmunk.client.toolkit'].split("."),
+            @versions['chipmunk.plugin.ipc'].split("."),
+            @versions['chipmunk-client-material'].split("."),
+            @versions['angular-core'].split("."),
+            @versions['angular-material'].split(".")
+        ];
+        hash = '';
+        for i in 0..2 do
+            if hash != ""
+                hash = "#{hash}."
+            end
+            for x in p do
+                hash = "#{hash}#{x[i]}"
+            end
+        end
+        return hash
     end
 
 end
