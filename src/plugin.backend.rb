@@ -58,7 +58,17 @@ class PluginBackend
         puts 'Uninstall electron and electron-rebuild'
         Rake.sh 'npm uninstall electron electron-rebuild'
         @state = true
-        return self.class.notarize(@path)
+        if @sign
+          error = self.class.notarize(@path)
+          if error.nil?
+            return true
+          else
+            @sign_state = error
+            return false
+          end
+        else
+          return true
+        end
       rescue StandardError => e
         puts e.message
         @state = nil
@@ -84,8 +94,8 @@ class PluginBackend
   end
 
   def self.notarize(path)
-    return true unless OS.mac?
-    return true if ENV['SKIP_NOTARIZE'].eql?('true')
+    return nil unless OS.mac?
+    return nil if ENV['SKIP_NOTARIZE'].eql?('true')
 
     if ENV.key?('SIGNING_ID')
       signing_id = ENV['SIGNING_ID']
@@ -94,7 +104,7 @@ class PluginBackend
     else
       puts 'Cannot sign plugins because cannot find signing_id.'
       puts 'Define it in APPLEID (for production) or in CHIPMUNK_DEVELOPER_ID (for developing)'
-      return false
+      return 'Fail to find APPLEID or CHIPMUNK_DEVELOPER_ID'
     end
     puts "Detected next SIGNING_ID = #{signing_id}\nTry to sign code for: #{path}"
     if ENV.key?('KEYCHAIN_NAME')
@@ -103,6 +113,6 @@ class PluginBackend
     full_path = File.expand_path("../#{path}", File.dirname(__FILE__))
     codesign_execution = "codesign --force --options runtime --deep --sign \"#{signing_id}\" {} \\;"
     Rake.sh "find #{full_path} -name \"*.node\" -type f -exec #{codesign_execution}"
-    true
+    nil
   end
 end
