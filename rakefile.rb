@@ -7,7 +7,7 @@ require './src/releases'
 PLUGINS_DEST_FOLDER = "./plugins";
 PLUGIN_RELEASE_FOLDER = "./releases"
 
-task :build do
+task :build, [:target] do |t, args|
     success = true
     register = Register.new()
     versions = Versions.new()
@@ -18,13 +18,15 @@ task :build do
         if plugin_info == nil
             break
         end
-        plugin = Plugin.new(plugin_info, PLUGINS_DEST_FOLDER, versions.get(), versions.get_hash(), releases)
-        if plugin.build()
-            plugin.cleanup()
-            puts "Plugin #{plugin_info['name']} is built SUCCESSFULLY"
-        else
-            success = false
-            puts "Fail to build plugin #{plugin_info['name']}"
+        if args.target == nil || (args.target != nil && plugin_info['name'] == args.target)
+            plugin = Plugin.new(plugin_info, PLUGINS_DEST_FOLDER, versions.get(), versions.get_hash(), releases)
+            if plugin.build()
+                plugin.cleanup()
+                puts "Plugin #{plugin_info['name']} is built SUCCESSFULLY"
+            else
+                success = false
+                puts "Fail to build plugin #{plugin_info['name']}"
+            end
         end
     end
     if success
@@ -33,3 +35,4 @@ task :build do
         cleanup()
     end
 end
+
