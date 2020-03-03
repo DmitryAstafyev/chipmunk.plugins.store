@@ -46,7 +46,7 @@ jobs:
           CHIPMUNK_PLUGINS_STORE_GITHUB_LOGIN: ${{ secrets.CHIPMUNK_PLUGINS_STORE_GITHUB_LOGIN }}
           CHIPMUNK_PLUGINS_STORE_GITHUB_PASW: ${{ secrets.CHIPMUNK_PLUGINS_STORE_GITHUB_PASW }}
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: meatlink/action-gh-release@fix-econnreset
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
