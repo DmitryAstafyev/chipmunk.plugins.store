@@ -77,6 +77,10 @@ class PluginBackend
         return @state
     end
 
+    def get_json
+      return @package_json
+    end
+
     def self.notarize(path)
       if !OS.mac?
         return true

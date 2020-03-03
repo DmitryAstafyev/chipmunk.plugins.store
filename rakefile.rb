@@ -11,7 +11,8 @@ task :build, [:target] do |t, args|
     success = true
     register = Register.new()
     versions = Versions.new()
-    releases = Releases.new(versions)
+    releases = Releases.new(register, versions)
+    summary = ""
     puts "Current versions hash:\n\t#{versions.get_hash()}\n"
     loop do
         plugin_info = register.next()
@@ -19,8 +20,9 @@ task :build, [:target] do |t, args|
             break
         end
         if args.target == nil || (args.target != nil && plugin_info['name'] == args.target)
-            plugin = Plugin.new(plugin_info, PLUGINS_DEST_FOLDER, versions.get(), versions.get_hash(), releases)
+            plugin = Plugin.new(plugin_info, PLUGINS_DEST_FOLDER, versions, releases)
             if plugin.build()
+                summary += plugin.get_summary()
                 plugin.cleanup()
                 puts "Plugin #{plugin_info['name']} is built SUCCESSFULLY"
             else
@@ -33,6 +35,12 @@ task :build, [:target] do |t, args|
         releases.normalize(register)
         releases.write()
         cleanup()
+        puts summary
     end
 end
 
+task :test do
+    register = Register.new()
+    versions = Versions.new()
+    releases = Releases.new(register, versions)
+end

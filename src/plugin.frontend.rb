@@ -14,6 +14,8 @@ class PluginFrontend
         @path = "#{path}/#{PLUGIN_FRONTEND_FOLDER}"
         @versions = versions
         @state = false
+        @is_angular = false
+        @package_json = self.class.get_package_json("#{@path}/package.json")
     end  
       
     def exist
@@ -33,21 +35,23 @@ class PluginFrontend
     end
 
     def install
-        angular = PluginFrontendAngular.new(@path, @versions, self.class.get_package_json("#{@path}/package.json"))
+        angular = PluginFrontendAngular.new(@path, @versions, @package_json)
         if angular.is()
             if angular.install()
                 @state = true
                 @path = angular.get_dist_path()
+                @is_angular = true
             else
                 @state = nil
             end
             return true
         end
-        frontend = PluginFrontendNotAngular.new(@path, @versions, self.class.get_package_json("#{@path}/package.json"))
+        frontend = PluginFrontendNotAngular.new(@path, @versions, @package_json)
         if frontend.is()
             if frontend.install()
                 @state = true
                 @path = frontend.get_dist_path()
+                @is_angular = false
             else
                 @state = nil
             end
@@ -62,6 +66,14 @@ class PluginFrontend
 
     def get_state
         return @state
+    end
+
+    def get_json
+        return @package_json
+    end
+
+    def has_angular
+        return @is_angular;
     end
 
     def self.get_package_json(path) 
