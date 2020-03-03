@@ -11,6 +11,7 @@ class PluginBackend
     @path = "#{path}/#{PLUGIN_BACKEND_FOLDER}"
     @versions = versions
     @state = false
+    @sign_state = !@sign ? 'no need' : ''
   end
 
   def exist
@@ -57,9 +58,7 @@ class PluginBackend
         puts 'Uninstall electron and electron-rebuild'
         Rake.sh 'npm uninstall electron electron-rebuild'
         @state = true
-        return self.class.notarize(@path) if @sign == true
-
-        return true
+        return self.class.notarize(@path)
       rescue StandardError => e
         puts e.message
         @state = nil
@@ -78,6 +77,10 @@ class PluginBackend
 
   def get_json
     @package_json
+  end
+
+  def get_sign_state
+    @sign_state
   end
 
   def self.notarize(path)

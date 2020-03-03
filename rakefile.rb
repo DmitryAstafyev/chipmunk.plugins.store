@@ -10,12 +10,13 @@ PLUGINS_DEST_FOLDER = './plugins'
 PLUGIN_RELEASE_FOLDER = './releases'
 
 task :build, [:target] do |_t, args|
-  success = true
   register = Register.new
   versions = Versions.new
   releases = Releases.new(register, versions)
   summary = ''
+
   puts "Current versions hash:\n\t#{versions.get_hash}\n"
+
   loop do
     plugin_info = register.next
     break if plugin_info.nil?
@@ -24,24 +25,15 @@ task :build, [:target] do |_t, args|
 
     plugin = Plugin.new(plugin_info, PLUGINS_DEST_FOLDER, versions, releases)
     if plugin.build
-      summary += plugin.get_summary
       plugin.cleanup
       puts "Plugin #{plugin_info['name']} is built SUCCESSFULLY"
     else
-      success = false
       puts "Fail to build plugin #{plugin_info['name']}"
     end
+    summary += plugin.get_summary
   end
-  if success
-    releases.normalize(register)
-    releases.write
-    cleanup
-    puts summary
-  end
-end
-
-task :test do
-  register = Register.new
-  versions = Versions.new
-  releases = Releases.new(register, versions)
+  releases.normalize(register)
+  releases.write
+  cleanup
+  puts summary
 end

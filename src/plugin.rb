@@ -13,16 +13,16 @@ class Plugin
     @versions = versions
     @root = "#{@path}/#{@info['name']}"
     @releases = releases
-    @summary = ''
+    @summary = "Plugin \"#{@info['name']}\" summary:\n"
   end
 
   def build
     starting = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    @summary = "Plugin \"#{@info['name']}\" summary:\n"
     target_file_name = self.class.get_name(@info['name'], @versions.get_hash, @info['version'])
     # Check version of plugin and make decision: update or not update (build or not build)
     if @releases.exist(target_file_name)
       puts "No need to build plugin #{@info['name']} because it's already exist"
+      @summary += "Building is skipped: release already exists\n"
       @releases.write()
       return true
     end
@@ -32,6 +32,7 @@ class Plugin
     dependencies = self.class.get_dependencies(backend, frontend)
     if !@releases.has_to_be_update(@info['name'], dependencies)
       puts "Available version of plugin is actual. No need to rebuild."
+      @summary += "Building is skipped: release is still actual\n"
       @releases.write()
       return true
     end
@@ -41,13 +42,16 @@ class Plugin
     else
       unless backend.valid
         puts "Fail to build plugin \"#{@info['name']}\" because backend isn't valid"
-        return nil
+        @summary += "Backend of plugin isn't valid\n"
+        return false
       end
       if backend.install
         puts "Install backend of \"#{@info['name']}\": SUCCESS"
         @summary += "\t- backend: OK\n"
       else
         puts "Install backend of \"#{@info['name']}\": FAIL"
+        @summary += "Fail to build backend\n"
+        return false
       end
     end
     if !frontend.exist
@@ -56,21 +60,26 @@ class Plugin
     else
       unless frontend.valid
         puts "Fail to build plugin \"#{@info['name']}\" because frontend isn't valid"
-        return nil
+        @summary += "Frontend of plugin isn't valid\n"
+        return false
       end
       if frontend.install
         puts "Install frontend of \"#{@info['name']}\": SUCCESS"
         @summary += "\t- frontend: OK\n"
       else
         puts "Install frontend of \"#{@info['name']}\": FAIL"
+        @summary += "Fail to build frontend\n"
+        return false
       end
     end
     if backend.get_state.nil? || frontend.get_state.nil?
       puts "Fail to build plugin \"#{@info['name']}\" because backend or frontend weren't installed correctly"
+      @summary += "Plugin doesn't have not frontend, not backend\n"
       return false
     end
     if backend.get_state && !frontend.get_state
       puts "Fail to build plugin \"#{@info['name']}\" because plugin has only backend"
+      @summary += "Plugin cannot have only backend\n"
       return false
     end
     unless File.directory?(PLUGIN_RELEASE_FOLDER)
@@ -108,6 +117,7 @@ class Plugin
     @summary += "\t- angular-material: #{dependencies['angular-material'] ? "TRUE" : "-"}\n"
     @summary += "\t- force: #{dependencies['force'] ? "TRUE" : "-"}\n"
     @summary += "Other:\n"
+    @summary += "\t- sign: #{backend.get_state.nil? ? '-' : backend.get_sign_state}s\n"
     @summary += "\t- hash: #{@versions.get_hash}\n"
     @summary += "\t- plugin hash: #{@versions.get_dep_hash(dependencies)}\n"
     @summary += "\t- built in: #{(ending - starting)}s\n"
