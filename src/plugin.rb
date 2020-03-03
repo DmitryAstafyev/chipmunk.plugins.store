@@ -23,7 +23,7 @@ class Plugin
             return true
         end
         self.class.clone(@info['name'], @info['repo'], @path)
-        backend = PluginBackend.new(@root, @versions)
+        backend = PluginBackend.new(@root, @versions, @info['has_to_be_signed'])
         if !backend.exist() 
             puts "Plugin \"#{@info['name']}\" doesn't have backend"
         else

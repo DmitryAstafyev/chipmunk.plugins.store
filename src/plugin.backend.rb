@@ -1,10 +1,12 @@
 require 'json'
+require 'dotenv/load'
 
 PLUGIN_BACKEND_FOLDER = "process"
 
 class PluginBackend
 
-    def initialize(path, versions)  
+    def initialize(path, versions, sign)
+        @sign = sign  
         @path = "#{path}/#{PLUGIN_BACKEND_FOLDER}"
         @versions = versions
         @state = false
@@ -55,6 +57,9 @@ class PluginBackend
                 puts "Uninstall electron and electron-rebuild"
                 Rake.sh "npm uninstall electron electron-rebuild"
                 @state = true
+                if @sign == true
+                  return self.class.notarize(@path)
+                end
                 return true
             rescue StandardError => e  
                 puts e.message
@@ -70,6 +75,32 @@ class PluginBackend
 
     def get_state
         return @state
+    end
+
+    def self.notarize(path)
+      if !OS.mac?
+        return true
+      end
+      if ENV['SKIP_NOTARIZE'].eql?('true')
+        return true
+      end
+      if ENV.key?('SIGNING_ID')
+        signing_id = ENV['SIGNING_ID']
+      elsif ENV.key?('CHIPMUNK_DEVELOPER_ID')
+        signing_id = ENV['CHIPMUNK_DEVELOPER_ID']
+      else
+        puts 'Cannot sign plugins because cannot find signing_id.'
+        puts 'Define it in APPLEID (for production) or in CHIPMUNK_DEVELOPER_ID (for developing)'
+        return false
+      end
+      puts "Detected next SIGNING_ID = #{signing_id}\nTry to sign code for: #{path}"
+      if ENV.key?('KEYCHAIN_NAME')
+        Rake.sh "security unlock-keychain -p \"$KEYCHAIN_PWD\" \"$KEYCHAIN_NAME\""
+      end
+      full_path = File.expand_path("../#{path}", File.dirname(__FILE__))
+      codesign_execution = "codesign --force --options runtime --deep --sign \"#{signing_id}\" {} \\;"
+      Rake.sh "find #{full_path} -name \"*.node\" -type f -exec #{codesign_execution}"
+      return true
     end
 
 end
