@@ -54,7 +54,7 @@ jobs:
             ./releases/*.json
           draft: true
         env:
-          SKIP_NOTARIZE: "true"
+          SKIP_NOTARIZE: ${{ secrets.SKIP_NOTARIZE }}
           SIGNING_ID: ${{ secrets.SIGNING_ID }}
           APPLEID: ${{ secrets.APPLEID }}
           CHIPMUNK_DEVELOPER_ID: ${{ secrets.CHIPMUNK_DEVELOPER_ID }}

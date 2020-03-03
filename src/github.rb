@@ -8,7 +8,6 @@ REPO = 'DmitryAstafyev/chipmunk.plugins.store'
 class Github
 
   def initialize
-    require 'dotenv/load'
     if !ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_LOGIN'].nil? && !ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_PASW'].nil? &&
        ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_LOGIN'] != '' && ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_PASW'] != ''
       puts 'Login to Github using login/password'
