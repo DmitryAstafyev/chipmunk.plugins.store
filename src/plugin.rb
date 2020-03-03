@@ -42,7 +42,7 @@ class Plugin
     else
       unless backend.valid
         puts "Fail to build plugin \"#{@info['name']}\" because backend isn't valid"
-        @summary += "Backend of plugin isn't valid\n"
+        @summary += "Backend of plugin isn't valid: #{backend.get_error}\n"
         return false
       end
       if backend.install
@@ -50,7 +50,7 @@ class Plugin
         @summary += "\t- backend: OK\n"
       else
         puts "Install backend of \"#{@info['name']}\": FAIL"
-        @summary += "Fail to build backend\n"
+        @summary += "Fail to build backend: #{backend.get_error}\n"
         return false
       end
     end
@@ -60,7 +60,7 @@ class Plugin
     else
       unless frontend.valid
         puts "Fail to build plugin \"#{@info['name']}\" because frontend isn't valid"
-        @summary += "Frontend of plugin isn't valid\n"
+        @summary += "Frontend of plugin isn't valid: #{frontend.get_error}\n"
         return false
       end
       if frontend.install
@@ -68,7 +68,7 @@ class Plugin
         @summary += "\t- frontend: OK\n"
       else
         puts "Install frontend of \"#{@info['name']}\": FAIL"
-        @summary += "Fail to build frontend\n"
+        @summary += "Fail to build frontend: #{frontend.get_error}\n"
         return false
       end
     end

@@ -18,6 +18,7 @@ class PluginFrontend
     @package_json = self.class.get_package_json("#{@path}/package.json")
     @angular = PluginFrontendAngular.new(@path, @versions, @package_json)
     @frontend = PluginFrontendNotAngular.new(@path, @versions, @package_json)
+    @error = ""
   end
 
   def exist
@@ -29,7 +30,8 @@ class PluginFrontend
   def valid
     package_json_path = "#{@path}/package.json"
     unless File.exist?(package_json_path)
-      puts "Fail to find #{package_json_path}"
+      @error = "Fail to find #{package_json_path}"
+      puts @error
       return false
     end
     true
@@ -41,6 +43,7 @@ class PluginFrontend
         @state = true
         @path = @angular.get_dist_path
       else
+        @error = @angular.get_error
         @state = nil
       end
       return true
@@ -50,6 +53,7 @@ class PluginFrontend
         @state = true
         @path = @frontend.get_dist_path
       else
+        @error = @frontend.get_error
         @state = nil
       end
       return true
@@ -67,6 +71,10 @@ class PluginFrontend
 
   def get_json
     @package_json
+  end
+
+  def get_error
+    @error
   end
 
   def has_angular

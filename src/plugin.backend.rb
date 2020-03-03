@@ -11,7 +11,8 @@ class PluginBackend
     @path = "#{path}/#{PLUGIN_BACKEND_FOLDER}"
     @versions = versions
     @state = false
-    @sign_state = !@sign ? 'no need' : ''
+    @sign_state = ""
+    @error = ""
   end
 
   def exist
@@ -23,17 +24,20 @@ class PluginBackend
   def valid
     package_json_path = "#{@path}/package.json"
     unless File.exist?(package_json_path)
-      puts "Fail to find #{package_json_path}"
+      @error = "Fail to find #{package_json_path}"
+      puts @error
       return false
     end
     @package_json_str = File.read(package_json_path)
     @package_json = JSON.parse(@package_json_str)
     unless @package_json.key?('scripts')
-      puts "File #{package_json_path} doesn't have section \"scripts\""
+      @error = "File #{package_json_path} doesn't have section \"scripts\""
+      puts @error
       return false
     end
     unless @package_json['scripts'].key?('build')
-      puts "Fail to find script \"build\" in section \"scripts\" of file #{package_json_path}"
+      @error = "Fail to find script \"build\" in section \"scripts\" of file #{package_json_path}"
+      puts @error
       return false
     end
     true
@@ -57,20 +61,24 @@ class PluginBackend
         # sign_plugin_binary("#{PLUGINS_SANDBOX}/#{plugin}/process")
         puts 'Uninstall electron and electron-rebuild'
         Rake.sh 'npm uninstall electron electron-rebuild'
-        @state = true
         if @sign
-          error = self.class.notarize(@path)
-          if error.nil?
+          @error = self.class.notarize(@path)
+          if @error.nil?
+            @sign_state = "Done or skipped"
+            @state = true
             return true
           else
-            @sign_state = error
+            @sign_state = "Failed"
             return false
           end
         else
+          @sign_state = "Not needed"
+          @state = true
           return true
         end
       rescue StandardError => e
         puts e.message
+        @error = e.message
         @state = nil
         return false
       end
@@ -85,8 +93,8 @@ class PluginBackend
     @state
   end
 
-  def get_json
-    @package_json
+  def get_error
+    @error
   end
 
   def get_sign_state
@@ -112,7 +120,11 @@ class PluginBackend
     end
     full_path = File.expand_path("../#{path}", File.dirname(__FILE__))
     codesign_execution = "codesign --force --options runtime --deep --sign \"#{signing_id}\" {} \\;"
-    Rake.sh "find #{full_path} -name \"*.node\" -type f -exec #{codesign_execution}"
-    nil
+    begin
+      Rake.sh "find #{full_path} -name \"*.node\" -type f -exec #{codesign_execution}"
+      return nil
+    rescue StandardError => e
+      return e.message
+    end
   end
 end

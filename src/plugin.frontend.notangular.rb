@@ -7,6 +7,7 @@ class PluginFrontendNotAngular
     @path = path
     @versions = versions
     @package_json = package_json
+    @error = ""
   end
 
   def is
@@ -17,7 +18,8 @@ class PluginFrontendNotAngular
 
   def valid
     unless @package_json.key?('name')
-      puts 'Field "name" not found in package.json'
+      @error = 'Field "name" not found in package.json'
+      puts @error
       return false
     end
     true
@@ -36,11 +38,16 @@ class PluginFrontendNotAngular
     end
     true
   rescue StandardError => e
-    puts e.message
-    false
+    @error = e.message
+    puts @error
+    return false
   end
 
   def get_dist_path
     @path
+  end
+
+  def get_error
+    @error
   end
 end

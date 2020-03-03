@@ -7,6 +7,7 @@ class PluginFrontendAngular
     @path = path
     @versions = versions
     @package_json = package_json
+    @error = ""
   end
 
   def is
@@ -17,7 +18,8 @@ class PluginFrontendAngular
 
   def valid
     unless @package_json.key?('name')
-      puts 'Field "name" not found in package.json'
+      @error = 'Field "name" not found in package.json'
+      puts @error
       return false
     end
     true
@@ -48,7 +50,8 @@ class PluginFrontendAngular
         puts 'Create empty folder'
         Rake.mkdir("./projects/#{@package_json['name']}")
       rescue StandardError => e
-        puts e.message
+        @error = e.message
+        puts @error
         return false
       end
     end
@@ -56,7 +59,8 @@ class PluginFrontendAngular
       puts 'Copy plugin sources'
       Rake.cp_r("#{@path}/.", "#{TMP_FOLDER}/#{PLUGIN_FRONTEND_ANGULAR_BASE_NAME}/projects/#{@package_json['name']}", verbose: false)
     rescue StandardError => e
-      puts e.message
+      @error = e.message
+      puts @error
       return false
     end
     Rake.cd "#{TMP_FOLDER}/#{PLUGIN_FRONTEND_ANGULAR_BASE_NAME}" do
@@ -67,7 +71,8 @@ class PluginFrontendAngular
         Rake.sh "./node_modules/.bin/ng build #{@package_json['name']}"
         return true
       rescue StandardError => e
-        puts e.message
+        @error = e.message
+        puts @error
         return false
       end
     end
@@ -75,5 +80,9 @@ class PluginFrontendAngular
 
   def get_dist_path
     "#{TMP_FOLDER}/#{PLUGIN_FRONTEND_ANGULAR_BASE_NAME}/dist/#{@package_json['name']}"
+  end
+
+  def get_error
+    @error
   end
 end
