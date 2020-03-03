@@ -104,7 +104,9 @@ class PluginBackend
   def self.notarize(path)
     require 'dotenv/load'
     return nil unless OS.mac?
-    return nil if ENV['SKIP_NOTARIZE'].include?('true')
+    if ENV.key?('SKIP_NOTARIZE') && ENV['SKIP_NOTARIZE'].eql?('true')
+      return nil
+    end
     if ENV.key?('SIGNING_ID')
       signing_id = ENV['SIGNING_ID']
     elsif ENV.key?('CHIPMUNK_DEVELOPER_ID')
