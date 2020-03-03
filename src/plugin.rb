@@ -23,13 +23,18 @@ class Plugin
     # Check version of plugin and make decision: update or not update (build or not build)
     if @releases.exist(target_file_name)
       puts "No need to build plugin #{@info['name']} because it's already exist"
-      @releases.write
+      @releases.write()
       return true
     end
     self.class.clone(@info['name'], @info['repo'], @path)
     backend = PluginBackend.new(@root, @versions.get, @info['has_to_be_signed'])
     frontend = PluginFrontend.new(@root, @versions.get)
     dependencies = self.class.get_dependencies(backend, frontend)
+    if !@releases.has_to_be_update(@info['name'], dependencies)
+      puts "Available version of plugin is actual. No need to rebuild."
+      @releases.write()
+      return true
+    end
     if !backend.exist
       puts "Plugin \"#{@info['name']}\" doesn't have backend"
       @summary += "\t- backend: -\n"
@@ -93,6 +98,15 @@ class Plugin
     @releases.add(@info['name'], file_name, @info['version'], dependencies)
     @releases.write
     ending = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    @summary += "Dependencies:\n"
+    @summary += "\t- electron: #{dependencies['electron'] ? "TRUE" : "-"}\n"
+    @summary += "\t- electron-rebuild: #{dependencies['electron-rebuild'] ? "TRUE" : "-"}\n"
+    @summary += "\t- chipmunk.client.toolkit: #{dependencies['chipmunk.client.toolkit'] ? "TRUE" : "-"}\n"
+    @summary += "\t- chipmunk.plugin.ipc: #{dependencies['chipmunk.plugin.ipc'] ? "TRUE" : "-"}\n"
+    @summary += "\t- chipmunk-client-material: #{dependencies['chipmunk-client-material'] ? "TRUE" : "-"}\n"
+    @summary += "\t- angular-core: #{dependencies['angular-core'] ? "TRUE" : "-"}\n"
+    @summary += "\t- angular-material: #{dependencies['angular-material'] ? "TRUE" : "-"}\n"
+    @summary += "\t- force: #{dependencies['force'] ? "TRUE" : "-"}\n"
     @summary += "Other:\n"
     @summary += "\t- hash: #{@versions.get_hash}\n"
     @summary += "\t- plugin hash: #{@versions.get_dep_hash(dependencies)}\n"
@@ -121,14 +135,10 @@ class Plugin
       'angular-material' => false,
       'force' => true
     }
-    @summary += "Dependencies:\n"
     if backend.exist
       dependencies['electron'] = true
       dependencies['electron-rebuild'] = true
       dependencies['chipmunk.plugin.ipc'] = true
-      @summary += "\t- electron: TRUE\n"
-      @summary += "\t- electron-rebuild: TRUE\n"
-      @summary += "\t- chipmunk.plugin.ipc: TRUE\n"
     end
     if frontend.exist
       if frontend.has_angular
@@ -136,13 +146,8 @@ class Plugin
         dependencies['chipmunk-client-material'] = true
         dependencies['angular-core'] = true
         dependencies['angular-material'] = true
-        @summary += "\t- chipmunk.client.toolkit: TRUE\n"
-        @summary += "\t- chipmunk-client-material: TRUE\n"
-        @summary += "\t- angular-core: TRUE\n"
-        @summary += "\t- angular-material: TRUE\n"
       else
         dependencies['chipmunk.client.toolkit'] = true
-        @summary += "\t- chipmunk.client.toolkit: TRUE\n"
       end
     end
     dependencies

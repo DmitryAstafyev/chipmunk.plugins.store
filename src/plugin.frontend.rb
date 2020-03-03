@@ -1,85 +1,81 @@
+# frozen_string_literal: true
+
 require 'json'
 require './src/plugin.frontend.angular'
 require './src/plugin.frontend.notangular'
 
-PLUGIN_FRONTEND_FOLDER = "render"
-PLUGIN_FRONTEND_ANGULAR_PACKAGE = "ng-package.json"
-PLUGIN_FRONTEND_ANGULAR_BASE_REPO = "https://github.com/DmitryAstafyev/chipmunk.frontend.angular.git"
-PLUGIN_FRONTEND_ANGULAR_BASE_NAME = "chipmunk.frontend.angular"
-TMP_FOLDER = "./tmp"
+PLUGIN_FRONTEND_FOLDER = 'render'
+PLUGIN_FRONTEND_ANGULAR_PACKAGE = 'ng-package.json'
+PLUGIN_FRONTEND_ANGULAR_BASE_REPO = 'https://github.com/DmitryAstafyev/chipmunk.frontend.angular.git'
+PLUGIN_FRONTEND_ANGULAR_BASE_NAME = 'chipmunk.frontend.angular'
+TMP_FOLDER = './tmp'
 
 class PluginFrontend
+  def initialize(path, versions)
+    @path = "#{path}/#{PLUGIN_FRONTEND_FOLDER}"
+    @versions = versions
+    @state = false
+    @package_json = self.class.get_package_json("#{@path}/package.json")
+    @angular = PluginFrontendAngular.new(@path, @versions, @package_json)
+    @frontend = PluginFrontendNotAngular.new(@path, @versions, @package_json)
+  end
 
-    def initialize(path, versions)  
-        @path = "#{path}/#{PLUGIN_FRONTEND_FOLDER}"
-        @versions = versions
-        @state = false
-        @is_angular = false
-        @package_json = self.class.get_package_json("#{@path}/package.json")
-    end  
-      
-    def exist
-        if !File.directory?(@path)
-            return false
-        end
-        return true
+  def exist
+    return false unless File.directory?(@path)
+
+    true
+  end
+
+  def valid
+    package_json_path = "#{@path}/package.json"
+    unless File.exist?(package_json_path)
+      puts "Fail to find #{package_json_path}"
+      return false
     end
+    true
+  end
 
-    def valid
-        package_json_path = "#{@path}/package.json"
-        if !File.exist?(package_json_path)
-            puts "Fail to find #{package_json_path}"
-            return false
-        end
-        return true
+  def install
+    if @angular.is
+      if @angular.install
+        @state = true
+        @path = @angular.get_dist_path
+      else
+        @state = nil
+      end
+      return true
     end
-
-    def install
-        angular = PluginFrontendAngular.new(@path, @versions, @package_json)
-        if angular.is()
-            if angular.install()
-                @state = true
-                @path = angular.get_dist_path()
-                @is_angular = true
-            else
-                @state = nil
-            end
-            return true
-        end
-        frontend = PluginFrontendNotAngular.new(@path, @versions, @package_json)
-        if frontend.is()
-            if frontend.install()
-                @state = true
-                @path = frontend.get_dist_path()
-                @is_angular = false
-            else
-                @state = nil
-            end
-            return true
-        end
-        return false
+    if @frontend.is
+      if @frontend.install
+        @state = true
+        @path = @frontend.get_dist_path
+      else
+        @state = nil
+      end
+      return true
     end
+    false
+  end
 
-    def get_path
-        return @path
-    end
+  def get_path
+    @path
+  end
 
-    def get_state
-        return @state
-    end
+  def get_state
+    @state
+  end
 
-    def get_json
-        return @package_json
-    end
+  def get_json
+    @package_json
+  end
 
-    def has_angular
-        return @is_angular;
-    end
+  def has_angular
+    @angular.is
+  end
 
-    def self.get_package_json(path) 
-        package_json_str = File.read(path)
-        package_json = JSON.parse(package_json_str)
-        return package_json
-    end
-
+  def self.get_package_json(path)
+    package_json_str = File.read(path)
+    package_json = JSON.parse(package_json_str)
+    package_json
+  end
 end
