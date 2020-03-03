@@ -54,8 +54,8 @@ jobs:
             ./releases/*.json
           draft: true
         env:
-          GITHUB_TOKEN: ${{ secrets.SKIP_NOTARIZE }}
-          GITHUB_TOKEN: ${{ secrets.SIGNING_ID }}
-          GITHUB_TOKEN: ${{ secrets.APPLEID }}
-          GITHUB_TOKEN: ${{ secrets.CHIPMUNK_DEVELOPER_ID }}
+          SKIP_NOTARIZE: ${{ secrets.SKIP_NOTARIZE }}
+          SIGNING_ID: ${{ secrets.SIGNING_ID }}
+          APPLEID: ${{ secrets.APPLEID }}
+          CHIPMUNK_DEVELOPER_ID: ${{ secrets.CHIPMUNK_DEVELOPER_ID }}
           GITHUB_TOKEN: ${{ secrets.CHIPMUNK_PLUGINS_STORE_GITHUB_TOKEN }}
