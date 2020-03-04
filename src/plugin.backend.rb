@@ -116,13 +116,13 @@ class PluginBackend
       puts 'Define it in APPLEID (for production) or in CHIPMUNK_DEVELOPER_ID (for developing)'
       return 'Fail to find APPLEID or CHIPMUNK_DEVELOPER_ID'
     end
-    puts "Detected next SIGNING_ID = #{signing_id}\nTry to sign code for: #{path}"
-    if ENV.key?('KEYCHAIN_NAME')
-      Rake.sh 'security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_NAME"'
-    end
-    full_path = File.expand_path("../#{path}", File.dirname(__FILE__))
-    codesign_execution = "codesign --force --options runtime --deep --sign \"#{signing_id}\" {} \\;"
     begin
+      puts "Detected next SIGNING_ID = #{signing_id}\nTry to sign code for: #{path}"
+      if ENV.key?('KEYCHAIN_NAME')
+        Rake.sh 'security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_NAME"'
+      end
+      full_path = File.expand_path("../#{path}", File.dirname(__FILE__))
+      codesign_execution = "codesign --force --options runtime --deep --sign \"#{signing_id}\" {} \\;"
       Rake.sh "find #{full_path} -name \"*.node\" -type f -exec #{codesign_execution}"
       return nil
     rescue StandardError => e
