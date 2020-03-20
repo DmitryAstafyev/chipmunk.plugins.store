@@ -5,7 +5,7 @@ require './src/github'
 require './src/tools'
 
 RELEASES_FILE_NAME = 'releases'
-#RELEASE_URL_PATTERN = 'https://github.com/esrlabs/chipmunk-plugins-store/releases/download/${tag}/${file_name}'
+# RELEASE_URL_PATTERN = 'https://github.com/esrlabs/chipmunk-plugins-store/releases/download/${tag}/${file_name}'
 RELEASE_URL_PATTERN = 'https://github.com/DmitryAstafyev/chipmunk.plugins.store/releases/download/${tag}/${file_name}'
 
 class Releases
@@ -57,6 +57,7 @@ class Releases
   end
 
   def add(name, file_name, version, dependencies)
+    history = self.class.get_history_by_name(@releases, name)
     @releases = @releases.reject do |release|
       release['name'] == name
     end
@@ -66,7 +67,8 @@ class Releases
                      'version' => version,
                      'dependencies' => dependencies,
                      'phash' => @versions.get_dep_hash(dependencies),
-                     'url' => RELEASE_URL_PATTERN.sub('${tag}', @tag).sub('${file_name}', file_name)
+                     'url' => RELEASE_URL_PATTERN.sub('${tag}', @tag).sub('${file_name}', file_name),
+                     'history' => history
                    })
   end
 
@@ -85,6 +87,7 @@ class Releases
     @releases.each do |release|
       plugin = register.get_by_name(release['name'])
       next if plugin.nil?
+
       result.push({
                     'name' => release['name'],
                     'file' => release['file'],
@@ -109,6 +112,13 @@ class Releases
     RELEASE_URL_PATTERN.sub('${tag}', @tag).sub('${file_name}', file_name)
   end
 
+  def self.get_history_by_name(releases, name)
+    release = releases.detect { |r| r['name'] == name }
+    history = []
+    history = release['history'] unless release.nil?
+    history
+  end
+
   def self.get_name
     "#{RELEASES_FILE_NAME}-#{get_nodejs_platform}.json"
   end
@@ -129,23 +139,24 @@ class Releases
           'force' => true
         }
       end
+      release['history'] = [] unless release.key?('history')
       result.push(release)
     end
     result
   end
 
   def self.get_history(release, hash)
-    history = []
-    history = release['history'] if release.key?('history')
+    history = release['history']
     key = "#{release['phash']}#{hash}#{release['version']}"
     exists = history.detect { |r| key == "#{r['phash']}#{r['hash']}#{r['version']}" }
     return history unless exists.nil?
+
     history.unshift({
-                   'phash' => release['phash'],
-                   'hash' => hash,
-                   'url' => release['url'],
-                   'version' => release['version']
-                 })
+                      'phash' => release['phash'],
+                      'hash' => hash,
+                      'url' => release['url'],
+                      'version' => release['version']
+                    })
     history
   end
 end
