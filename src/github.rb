@@ -3,7 +3,8 @@
 require 'octokit'
 require 'open-uri'
 
-REPO = 'esrlabs/chipmunk-plugins-store'
+#REPO = 'esrlabs/chipmunk-plugins-store'
+REPO = 'DmitryAstafyev/chipmunk-plugins-store'
 
 class Github
   def initialize
