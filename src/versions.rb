@@ -3,7 +3,8 @@
 require 'json'
 require 'open-uri'
 
-VERSIONS_FILE_URL = "https://raw.githubusercontent.com/esrlabs/chipmunk/master/versions.json";
+#VERSIONS_FILE_URL = "https://raw.githubusercontent.com/esrlabs/chipmunk/master/versions.json";
+VERSIONS_FILE_URL = "https://raw.githubusercontent.com/DmitryAstafyev/logviewer/angular_upgrade/versions.json"
 
 class Versions
   def initialize
