@@ -3,21 +3,20 @@
 require 'octokit'
 require 'open-uri'
 
-REPO = 'DmitryAstafyev/chipmunk.plugins.store'
+REPO = 'esrlabs/chipmunk-plugins-store'
 
 class Github
-
   def initialize
-    if !ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_LOGIN'].nil? && !ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_PASW'].nil? &&
-       ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_LOGIN'] != '' && ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_PASW'] != ''
+    if !ENV['GITHUB_LOGIN'].nil? && !ENV['GITHUB_PASW'].nil? &&
+       ENV['GITHUB_LOGIN'] != '' && ENV['GITHUB_PASW'] != ''
       puts 'Login to Github using login/password'
-      @client = Octokit::Client.new(login: ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_LOGIN'], password: ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_PASW'])
+      @client = Octokit::Client.new(login: ENV['GITHUB_LOGIN'], password: ENV['GITHUB_PASW'])
     else
       puts 'Login to Github using token'
-      @client = Octokit::Client.new(access_token: ENV['CHIPMUNK_PLUGINS_STORE_GITHUB_TOKEN'])
+      @client = Octokit::Client.new(access_token: ENV['GITHUB_TOKEN'])
     end
-    user = @client.user
-    puts "Github login: #{user.login}"
+    @tag = self.class.detect_last_tag(@client)
+    puts "Detected tag: #{@tag}"
   end
 
   def get_releases_list(target)
@@ -29,21 +28,31 @@ class Github
     assets.each do |a|
       release_file_asset = a if a.name == target
     end
-    if release_file_asset.nil?
-      raise "Fail to find latest release file on repo #{REPO}"
-    end
+    raise "Fail to find latest release file on repo #{REPO}" if release_file_asset.nil?
 
     puts "Reading releases file from \"#{release_file_asset.browser_download_url}\""
-    release_file_asset_contents = open(release_file_asset.browser_download_url, &:read)
+    release_file_asset_contents = URI.open(release_file_asset.browser_download_url, &:read)
     releases = JSON.parse(release_file_asset_contents)
     releases
   end
 
   def get_last_tag
-    tags = @client.tags(REPO, {})
+    @tag
+  end
+
+  def self.detect_last_tag(client)
+    if ENV.key?('GITHUB_REF')
+      tag = ENV['GITHUB_REF'].dup.sub!('refs/tags/', '')
+      if !tag.nil? && !tag.empty? && Gem::Version.correct?(tag)
+        puts 'Tag was exctracted from REF'
+        return tag
+      end
+    end
+    tags = client.tags(REPO, {})
     raise "At least one tag should be defined on #{REPO}" if tags.empty?
 
     tags = tags.sort { |a, b| Gem::Version.new(b.name) <=> Gem::Version.new(a.name) }
-    tags[0]
+    puts "Tag was gotten from list of repo's tags"
+    tags[0].name
   end
 end

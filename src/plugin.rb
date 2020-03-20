@@ -7,12 +7,13 @@ require './src/plugin.frontend'
 require './src/tools'
 
 class Plugin
-  def initialize(info, path, versions, releases)
+  def initialize(info, path, versions, releases, rebuild)
     @info = info
     @path = path
     @versions = versions
     @root = "#{@path}/#{@info['name']}"
     @releases = releases
+    @rebuild = rebuild
     @summary = "Plugin \"#{@info['name']}\" summary:\n"
   end
 
@@ -20,20 +21,20 @@ class Plugin
     starting = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     target_file_name = self.class.get_name(@info['name'], @versions.get_hash, @info['version'])
     # Check version of plugin and make decision: update or not update (build or not build)
-    if @releases.exist(target_file_name)
+    if @releases.exist(target_file_name) && !@rebuild
       puts "No need to build plugin #{@info['name']} because it's already exist"
       @summary += "Building is skipped: release already exists\n"
-      @releases.write()
+      @releases.write
       return true
     end
     self.class.clone(@info['name'], @info['repo'], @path)
     backend = PluginBackend.new(@root, @versions.get, @info['has_to_be_signed'])
     frontend = PluginFrontend.new(@root, @versions.get)
     dependencies = self.class.get_dependencies(backend, frontend)
-    if !@releases.has_to_be_update(@info['name'], dependencies)
-      puts "Available version of plugin is actual. No need to rebuild."
+    if !@releases.has_to_be_update(@info['name'], dependencies) && !@rebuild
+      puts 'Available version of plugin is actual. No need to rebuild.'
       @summary += "Building is skipped: release is still actual\n"
-      @releases.write()
+      @releases.write
       return true
     end
     if !backend.exist
@@ -94,30 +95,34 @@ class Plugin
     copy_dist(backend.get_path, "#{dest}/process") if backend.get_state
     copy_dist(frontend.get_path, "#{dest}/render") if frontend.get_state
     file_name = self.class.get_name(@info['name'], @versions.get_hash, @info['version'])
-    self.class.add_info(
-      dest,
-      @info['name'],
-      @releases.get_url(file_name),
-      file_name, @info['version'],
-      @versions.get_hash,
-      @versions.get_dep_hash(dependencies),
-      dependencies
-    )
+    self.class.add_info(dest, {
+                          'name' => @info['name'],
+                          'file' => file_name,
+                          'version' => @info['version'],
+                          'hash' => @versions.get_hash,
+                          'phash' => @versions.get_dep_hash(dependencies),
+                          'url' => @releases.get_url(file_name),
+                          'display_name' => @info['display_name'],
+                          'description' => @info['description'],
+                          'readme' => @info['readme'],
+                          'icon' => @info['icon'],
+                          'dependencies' => dependencies
+                        })
     compress("#{PLUGIN_RELEASE_FOLDER}/#{file_name}", PLUGIN_RELEASE_FOLDER, @info['name'])
     @releases.add(@info['name'], file_name, @info['version'], dependencies)
     @releases.write
     ending = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     @summary += "Dependencies:\n"
-    @summary += "\t- electron: #{dependencies['electron'] ? "TRUE" : "-"}\n"
-    @summary += "\t- electron-rebuild: #{dependencies['electron-rebuild'] ? "TRUE" : "-"}\n"
-    @summary += "\t- chipmunk.client.toolkit: #{dependencies['chipmunk.client.toolkit'] ? "TRUE" : "-"}\n"
-    @summary += "\t- chipmunk.plugin.ipc: #{dependencies['chipmunk.plugin.ipc'] ? "TRUE" : "-"}\n"
-    @summary += "\t- chipmunk-client-material: #{dependencies['chipmunk-client-material'] ? "TRUE" : "-"}\n"
-    @summary += "\t- angular-core: #{dependencies['angular-core'] ? "TRUE" : "-"}\n"
-    @summary += "\t- angular-material: #{dependencies['angular-material'] ? "TRUE" : "-"}\n"
-    @summary += "\t- force: #{dependencies['force'] ? "TRUE" : "-"}\n"
+    @summary += "\t- electron: #{dependencies['electron'] ? 'TRUE' : '-'}\n"
+    @summary += "\t- electron-rebuild: #{dependencies['electron-rebuild'] ? 'TRUE' : '-'}\n"
+    @summary += "\t- chipmunk.client.toolkit: #{dependencies['chipmunk.client.toolkit'] ? 'TRUE' : '-'}\n"
+    @summary += "\t- chipmunk.plugin.ipc: #{dependencies['chipmunk.plugin.ipc'] ? 'TRUE' : '-'}\n"
+    @summary += "\t- chipmunk-client-material: #{dependencies['chipmunk-client-material'] ? 'TRUE' : '-'}\n"
+    @summary += "\t- angular-core: #{dependencies['angular-core'] ? 'TRUE' : '-'}\n"
+    @summary += "\t- angular-material: #{dependencies['angular-material'] ? 'TRUE' : '-'}\n"
+    @summary += "\t- force: #{dependencies['force'] ? 'TRUE' : '-'}\n"
     @summary += "Other:\n"
-    @summary += "\t- sign: #{backend.get_state.nil? ? '-' : backend.get_sign_state}s\n"
+    @summary += "\t- sign: #{!backend.exist ? 'no backend' : backend.get_sign_state}\n"
     @summary += "\t- hash: #{@versions.get_hash}\n"
     @summary += "\t- plugin hash: #{@versions.get_dep_hash(dependencies)}\n"
     @summary += "\t- built in: #{(ending - starting)}s\n"
@@ -180,18 +185,9 @@ class Plugin
     "#{name}@#{hash}-#{version}-#{get_nodejs_platform}.tgz"
   end
 
-  def self.add_info(dest, name, url, file_name, version, hash, phash, dependencies)
-    info = {
-      'name' => name,
-      'file' => file_name,
-      'version' => version,
-      'hash' => hash,
-      'phash' => phash,
-      'url' => url,
-      'dependencies' => dependencies
-    }
+  def self.add_info(dest, entry)
     File.open("./#{dest}/info.json", 'w') do |f|
-      f.write(info.to_json)
+      f.write(entry.to_json)
     end
   end
 end
